@@ -20,10 +20,3 @@ export function verifyJWT(token: string) {
   const payload = jsonwebtoken.verify(token, jwt.publicKey);
   return payload as JwtVerifyPayload;
 }
-
-export function verifyJWTB2C(token: string) {
-  const USER_CLAIMS = { issuer: "auth service", audience: "user", subject: "user api" };
-
-  const payload = jsonwebtoken.verify(token, jwt.publicKey2, { ...USER_CLAIMS, algorithms: ["HS256"] });
-  return payload as JwtVerifyPayload;
-}
