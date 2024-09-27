@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json.schemastore.org/swcrc",
+    "sourceMaps": true,
+    "jsc": {
+        "paths": {
+            "project/*": ["./src/*"]
+        },
+        "parser": {
+            "syntax": "typescript",
+            "tsx": true,
+            "decorators": true,
+            "dynamicImport": true
+        },
+        "transform": {
+            "react": {
+                "runtime": "automatic"
+            }
+        },
+        "target": "es2022",
+        "externalHelpers": true
+    },
+"module": {
+    "type": "es6",
+    "resolveFully": true, 
+    // These are defaults.
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  }
+}

@@ -1,0 +1,11 @@
+model Teacher {
+  id       Int      @id @default(autoincrement())
+  schoolId Int
+  name     String
+  email    String
+  contact  String
+  address  String?
+  image    String?
+  dob      DateTime @default(now())
+  status   String   @default("active")
+}

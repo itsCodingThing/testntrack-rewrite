@@ -1,0 +1,26 @@
+name: TNT Backend CD
+
+on:
+    push:
+        branches: [production]
+
+jobs:
+    deploy-backend:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy using ssh
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  key: ${{ secrets.PRIVATE_KEY }}
+                  script: |
+                      cd ~/tnt_backend
+                      git checkout production
+                      git pull origin production
+                      git status
+                      pm2 stop tnt_backend
+                      pm2 delete tnt_backend
+                      npm install
+                      npm run build:prod
+                      npm run pm2:prod

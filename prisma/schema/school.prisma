@@ -1,0 +1,32 @@
+model School {
+  id              Int               @id @default(autoincrement())
+  name            String
+  email           String
+  contact         String
+  address         String            @default("no address available")
+  type            String
+  code            String
+  image           String            @default("no image available")
+  status          String            @default("pending")
+  schoolDetails   SchoolDetails?
+  schoolAdminUser SchoolAdminUser[]
+}
+
+model SchoolAdminUser {
+  id       Int    @id @default(autoincrement())
+  school   School @relation(fields: [schoolId], references: [id])
+  schoolId Int
+  name     String
+  email    String @unique
+  password String
+  contact  String
+}
+
+model SchoolDetails {
+  school         School @relation(fields: [schoolId], references: [id])
+  schoolId       Int    @unique
+  total_batches  Int    @default(0)
+  total_papers   Int    @default(0)
+  total_students Int    @default(0)
+  total_teachers Int    @default(0)
+}

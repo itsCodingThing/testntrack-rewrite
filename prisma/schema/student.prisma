@@ -1,0 +1,12 @@
+model Student {
+  id       Int       @id @default(autoincrement())
+  schoolId Int
+  name     String
+  dob      DateTime? @default(now())
+  rollNo   String?   @default("")
+  email    String
+  contact  String
+  image    String?   @default("https://picsum.photos/200")
+  address  String
+  status   String    @default("active")
+}

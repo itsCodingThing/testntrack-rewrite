@@ -1,0 +1,7 @@
+.eslintrc.cjs
+ecosystem.config.cjs
+
+/build
+/node_modules
+/.vscode
+/.github

@@ -1,0 +1,54 @@
+services:
+  # tnt-server:
+  #   container_name: tnt-server
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/Dockerfile
+  #   working_dir: /testntrack_backend_backup
+  #   environment:
+  #     - PORT=8080
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - sql
+  #   develop:
+  #     watch:
+  #       - action: sync
+  #         path: ./testntrack_backend_backup
+  #         target: /testntrack_backend_backup
+  #         ignore:
+  #           - node_modules/
+  #       - action: rebuild
+  #         path: package.json
+  #
+  postgresdb0:
+    container_name: postgresdb0
+    image: postgres:alpine
+    restart: always
+    networks:
+      - sql
+    environment:
+      POSTGRES_USER: postgresdb0
+      POSTGRES_PASSWORD: password
+    volumes:
+      - /var/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pg-admin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    networks:
+      - sql
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+
+networks:
+  sql:
+    name: common
+    external: true
