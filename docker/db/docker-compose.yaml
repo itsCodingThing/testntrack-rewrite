@@ -1,0 +1,32 @@
+services:
+  postgresdb:
+    container_name: postgresdb
+    image: postgres:alpine
+    restart: always
+    networks:
+      - sql
+    environment:
+      POSTGRES_USER: postgresdb0
+      POSTGRES_PASSWORD: password
+    volumes:
+      - /var/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    networks:
+      - sql
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - 5050:5050
+
+networks:
+  sql:
+    name: common
+    external: true
