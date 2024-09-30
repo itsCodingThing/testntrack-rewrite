@@ -130,6 +130,8 @@ export const schoolRoutes: FastifyPluginAsync = async (fastify) => {
     url: "/school/:schoolId/remove",
     handler: async (req, res) => {
       const { schoolId } = await parseAsync(zod.object({ schoolId: zod.coerce.number() }), req.params);
+      await prisma.schoolAdminUser.deleteMany({ where: { schoolId: schoolId } });
+      await prisma.schoolDetails.deleteMany({ where: { schoolId: schoolId } });
       await prisma.school.delete({ where: { id: schoolId } });
 
       return sendSuccessResponse({ response: res, msg: "school removed successfully" });
