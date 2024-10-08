@@ -23,7 +23,8 @@ export async function parseAsync<TSchema extends z.ZodTypeAny>(schema: TSchema, 
     return safeValues as z.infer<TSchema>;
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new ValidationError({ data: error.issues });
+      const errMessages = error.issues.map(({ message }) => message);
+      throw new ValidationError({ data: errMessages });
     } else {
       throw new ValidationError();
     }

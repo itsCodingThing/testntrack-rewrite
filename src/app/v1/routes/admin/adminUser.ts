@@ -15,7 +15,27 @@ export const adminUserRoutes: FastifyPluginAsync = async (fastify) => {
     url: "/admin",
     handler: async (_req, res) => {
       return sendSuccessResponse({
-        data: await prisma.adminUser.findMany({ select: { name: true, id: true } }),
+        data: await prisma.adminUser.findMany({ select: { name: true, id: true, contact: true, email: true } }),
+        response: res,
+      });
+    },
+  });
+
+  /**
+   *  @route  GET "/api/v1/admin/:adminId"
+   *  @desc   Get admin details
+   */
+  fastify.route({
+    method: "GET",
+    url: "/admin/:adminId",
+    handler: async (req, res) => {
+      const { adminId } = await parseAsync(zod.object({ adminId: zod.coerce.number() }), req.params);
+
+      return sendSuccessResponse({
+        data: await prisma.adminUser.findFirst({
+          where: { id: adminId },
+          select: { name: true, id: true, contact: true, email: true },
+        }),
         response: res,
       });
     },

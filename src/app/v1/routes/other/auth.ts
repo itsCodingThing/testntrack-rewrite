@@ -4,18 +4,6 @@ import { compareHashPassword, encryptPassword } from "project/utils/encrypt.js";
 import { generateJWT } from "project/utils/jwt.js";
 import { sendErrorResponse, sendSuccessResponse } from "project/utils/serverResponse.js";
 import { parseAsync, zod } from "project/utils/validation.js";
-// import type { IDBStudent } from "../../../../database/models/Student.js";
-// import {
-//   OTPService,
-//   DeviceService,
-//   StudentService,
-//   SchoolService,
-//   SchoolAdminUserService,
-//   AdminUserService,
-//   ParentService,
-//   EvaluatorService,
-//   TeacherService,
-// } from "../../../../services/index.js";
 import { prisma } from "project/database/db.connection.js";
 
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
@@ -44,7 +32,12 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
 
       return sendSuccessResponse({
         data: await prisma.adminUser.create({
-          data: { email: body.email, password: encryptPassword(body.password), name: "demo", contact: "9876543210" },
+          data: {
+            email: body.email,
+            password: encryptPassword(body.password),
+            name: body.name ?? "admin",
+            contact: "9876543210",
+          },
         }),
         response: res,
       });
@@ -60,50 +53,73 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
     url: "/auth/login",
     handler: async (req, res) => {
       const body = await parseAsync(
-        zod.object({
-          type: zod.string(),
-          email: zod.string(),
-          password: zod.string(),
-        }),
+        zod.discriminatedUnion(
+          "type",
+          [
+            zod.object({
+              type: zod.literal("admin"),
+              email: zod.string().email("enter a valid email"),
+              password: zod.string().min(8, "please enter password min 8 charactor long"),
+            }),
+            zod.object({
+              type: zod.literal("school"),
+              email: zod.string().email("enter a valid email"),
+              password: zod.string().min(8, "please enter password min 8 charactor long"),
+              code: zod.string().min(3, "code must atleast be 3 charactor long"),
+            }),
+          ],
+          {
+            errorMap: () => ({ message: "invalid user type" }),
+          }
+        ),
         req.body
       );
 
       if (body.type === "admin") {
-        const user = await prisma.adminUser.findFirst({ where: { email: body.email } });
-        if (!user) {
+        const admin = await prisma.adminUser.findFirst({ where: { email: body.email } });
+        if (!admin) {
           return sendErrorResponse({ msg: "Admin does not exists", response: res });
         }
 
-        if (!compareHashPassword(body.password, user.password)) {
+        if (!compareHashPassword(body.password, admin.password)) {
           return sendErrorResponse({
             msg: "Invalid password. Please enter correct password and try again",
             response: res,
           });
         }
 
-        const token = generateJWT({ id: user.id.toString(), type: body.type, school: "" });
+        const token = generateJWT({ id: admin.id.toString(), type: body.type, school: "" });
+        return sendSuccessResponse({ data: { token }, response: res });
+      }
+
+      if (body.type === "school") {
+        const school = await prisma.school.findFirst({ where: { code: body.code } });
+
+        if (!school) {
+          return sendErrorResponse({ msg: "School does not exists", response: res });
+        }
+
+        const schoolAdmin = await prisma.schoolAdminUser.findFirst({ where: { email: body.email } });
+        if (!schoolAdmin) {
+          return sendErrorResponse({ msg: "Admin does not exists", response: res });
+        }
+
+        if (!compareHashPassword(body.password, schoolAdmin.password)) {
+          return sendErrorResponse({
+            msg: "Invalid password. Please enter correct password and try again",
+            response: res,
+          });
+        }
+
+        const token = generateJWT({
+          id: schoolAdmin.id.toString(),
+          school: school.id.toString(),
+          type: body.type,
+        });
         return sendSuccessResponse({ data: { token }, response: res });
       }
 
       return sendErrorResponse({ msg: "user type is invalid", response: res });
-      // if (body.type === "school_admin") {
-      //   const user = await SchoolAdminUserService.findSchoolAdminUserByEmail(body.email);
-      //   if (!user) {
-      //     return sendErrorResponse({ msg: "Admin does not exists", response: res });
-      //   }
-      //
-      //   await SchoolService.createDefaultSession(user.school.toString());
-      //
-      //   if (!compareHashPassword(body.password, user.password)) {
-      //     return sendErrorResponse({
-      //       msg: "Invalid password. Please enter correct password and try again",
-      //       response: res,
-      //     });
-      //   }
-      //
-      //   const token = generateJWT({ id: user._id.toString(), school: user.school.toString(), type: body.type });
-      //   return sendSuccessResponse({ data: { token }, response: res });
-      // }
     },
   });
 
