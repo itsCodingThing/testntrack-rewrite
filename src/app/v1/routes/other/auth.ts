@@ -89,7 +89,7 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
         }
 
         const token = generateJWT({ id: admin.id.toString(), type: body.type, school: "" });
-        return sendSuccessResponse({ data: { token }, response: res });
+        return sendSuccessResponse({ data: { token, id: admin.id, name: admin.name }, response: res });
       }
 
       if (body.type === "school") {
@@ -116,7 +116,10 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
           school: school.id.toString(),
           type: body.type,
         });
-        return sendSuccessResponse({ data: { token }, response: res });
+        return sendSuccessResponse({
+          data: { token, id: schoolAdmin.id, name: schoolAdmin.name, schoolName: school.id, schoolId: school.id },
+          response: res,
+        });
       }
 
       return sendErrorResponse({ msg: "user type is invalid", response: res });
