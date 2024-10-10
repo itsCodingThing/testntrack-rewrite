@@ -5,10 +5,6 @@ import { parseAsync, zod } from "project/utils/validation.js";
 import { prisma } from "project/database/db.connection.js";
 
 export const studentRoutes: FastifyPluginAsync = async (fastify) => {
-  // fastify.register(studentExamRoutes);
-  // fastify.register(studentResultRoutes);
-  // fastify.register(marketPaperBundleRoutes);
-
   /**
    * @route GET "/student/:studentId"
    * @desc  Get student details

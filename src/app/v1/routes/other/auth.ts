@@ -88,8 +88,8 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
           });
         }
 
-        const token = generateJWT({ id: admin.id.toString(), type: body.type, school: "" });
-        return sendSuccessResponse({ data: { token, id: admin.id, name: admin.name }, response: res });
+        const token = generateJWT({ id: admin.id.toString(), type: body.type });
+        return sendSuccessResponse({ data: { token, id: admin.id, name: admin.name, type: "admin" }, response: res });
       }
 
       if (body.type === "school") {
@@ -111,13 +111,19 @@ export const authRoutes: FastifyPluginAsync = async (fastify) => {
           });
         }
 
-        const token = generateJWT({
-          id: schoolAdmin.id.toString(),
-          school: school.id.toString(),
-          type: body.type,
-        });
         return sendSuccessResponse({
-          data: { token, id: schoolAdmin.id, name: schoolAdmin.name, schoolName: school.id, schoolId: school.id },
+          data: {
+            token: generateJWT({
+              id: schoolAdmin.id.toString(),
+              school: school.id.toString(),
+              type: body.type,
+            }),
+            id: schoolAdmin.id,
+            name: schoolAdmin.name,
+            schoolName: school.id,
+            schoolId: school.id,
+            type: "school-admin",
+          },
           response: res,
         });
       }

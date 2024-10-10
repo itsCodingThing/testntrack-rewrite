@@ -5,7 +5,7 @@ const { jwt } = config;
 
 interface IPayload {
   id: string;
-  school: string;
+  school?: string;
   type: string;
 }
 
