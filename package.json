@@ -11,9 +11,6 @@
     "start:prod": "npm run clean && tsc -p tsconfig.json && swc src -d build --copy-files && npm run server:prod",
     "start:dev": "npm run clean && conc -c 'auto' --n swc,tsc,server 'swc src -d build --copy-files -w' 'tsc -p tsconfig.json --watch' 'npm run server:dev'"
   },
-  "prisma": {
-    "seed": "tsx src/utils/db-seed/seed.ts"
-  },
   "dependencies": {
     "@fastify/auth": "^4.2.0",
     "@fastify/cors": "^8.2.1",
