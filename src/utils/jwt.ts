@@ -1,22 +1,21 @@
-import jsonwebtoken, { type JwtPayload } from "jsonwebtoken";
-import { config } from "./utils.js";
+import * as jose from "jose";
+import { config } from "./utils";
 
 const { jwt } = config;
+const secret = new TextEncoder().encode(jwt.publicKey);
 
 interface IPayload {
   id: string;
-  school?: string;
-  type: string;
 }
 
-export type JwtVerifyPayload = IPayload & JwtPayload;
+export async function generateJWT(payload: IPayload) {
+  const sign = new jose.SignJWT({ id: payload.id });
 
-export function generateJWT(payload: IPayload) {
-  const token = jsonwebtoken.sign(payload, jwt.publicKey, { expiresIn: jwt.expiresIn });
+  const token = await sign.setProtectedHeader({ alg: "HS256" }).setExpirationTime("7d").sign(secret);
   return token;
 }
 
-export function verifyJWT(token: string) {
-  const payload = jsonwebtoken.verify(token, jwt.publicKey);
-  return payload as JwtVerifyPayload;
+export async function verifyJWT(token: string) {
+  const payload = await jose.jwtVerify(token, secret);
+  return payload;
 }

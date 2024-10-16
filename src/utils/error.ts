@@ -1,5 +1,4 @@
-import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
-import { sendErrorResponse } from "./serverResponse.js";
+import { createResponse } from "./serverResponse.js";
 import type { ObjValueAsType } from "./types.js";
 
 const ErrorNames = {
@@ -57,12 +56,9 @@ export class ServiceError extends BaseError {
   }
 }
 
-export async function errorHandler(error: FastifyError, req: FastifyRequest, res: FastifyReply) {
-  if (process.env.NODE_ENV === "development") req.log.error(error);
-
+export function createErrorResponse(error: Error) {
   if (error instanceof ValidationError) {
-    return sendErrorResponse({
-      response: res,
+    return createResponse({
       code: error.code,
       msg: error.name,
       data: error.data,
@@ -70,13 +66,12 @@ export async function errorHandler(error: FastifyError, req: FastifyRequest, res
   }
 
   if (error instanceof BaseError) {
-    return sendErrorResponse({
-      response: res,
+    return createResponse({
       code: error.code,
       msg: `${error.name}: ${error.msg}`.trim(),
       data: error.data,
     });
   }
 
-  return sendErrorResponse({ msg: ErrorNames.internal, data: error.toString(), response: res });
+  return createResponse({ msg: ErrorNames.internal, code: 500 });
 }

@@ -1,9 +1,10 @@
 import { randomInt } from "node:crypto";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve, sep } from "node:path";
-import * as url from "url";
-import { v4 as uuid } from "uuid";
+import url from "node:url";
+import crypto from "node:crypto";
 import { getUTCTimestamp } from "./date.js";
+import { warn } from "node:console";
 
 export const dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -14,8 +15,12 @@ export const storagePath = {
   docs: resolve(dirname, `..${sep}..${sep}`, `data${sep}docs`),
 };
 
-export { default as config } from "project/config/config.js";
-export { default as firebaseConfig } from "project/config/firebase.js";
+export const config = {
+  jwt: {
+    publicKey: "asldkfjaslkfjslqoietupreoifdghtyhrtueruytjht56h46r5h4e6r54h6er5t4hbsd65ga2sdf13as2f9as8d7f9adfaf",
+    expiresIn: "7d",
+  },
+};
 
 export function customObjectGroupBy<L, K extends keyof L>(list: L[], key: K) {
   const map = new Map();
@@ -37,7 +42,7 @@ export function customObjectGroupBy<L, K extends keyof L>(list: L[], key: K) {
 }
 
 export function getFilePathName(type: "image" | "pdf" | "audio") {
-  const id = `${uuid()}-${getUTCTimestamp()}`;
+  const id = `${crypto.randomUUID()}-${getUTCTimestamp()}`;
 
   switch (type) {
     case "image": {
