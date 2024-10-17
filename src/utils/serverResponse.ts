@@ -1,15 +1,11 @@
-interface IResponse {
+interface Response {
   code?: number;
   msg?: string;
   data?: any;
   status?: boolean;
 }
 
-export function createResponse(params: IResponse) {
-  const { code = 200, msg, data = {}, status } = params;
-  if (Array.isArray(data)) {
-    return { statusCode: code, message: msg, data: data, status };
-  }
-
+export function createResponse(params: Response) {
+  const { code = 200, msg = "success", data = {}, status = true} = params;
   return { statusCode: code, message: msg, data: data, status };
 }

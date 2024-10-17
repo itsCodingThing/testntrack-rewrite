@@ -1,23 +1,33 @@
 import { createMiddleware } from "hono/factory";
+import { ValidationError } from "project/utils/error";
 import { verifyJWT } from "project/utils/jwt";
 import logger from "project/utils/logger";
 import { parseAsync, zod } from "project/utils/validation";
 
-export const authMiddleware = createMiddleware(async (ctx, next) => {
-  const { authorization } = await parseAsync(
-    zod.object({
-      authorization: zod.string(),
-    }),
-    ctx.req.header(),
-  );
+const NON_AUTH_URLS = ["/auth"];
 
-  try {
-    const token = authorization.split(" ")[1];
-    const payload = await verifyJWT(token);
-    logger.info(payload, "request payload");
-  } catch (error) {
-    throw new Error("Auth Error");
-  }
+export const authMiddleware = () =>
+  createMiddleware(async (ctx, next) => {
+    const authorized = !NON_AUTH_URLS.some((v) => ctx.req.url.toLowerCase().includes(v.toLocaleLowerCase()));
+    if (authorized) {
+      const headers = ctx.req.header();
+      const { authorization } = await parseAsync(
+        zod.object({
+          authorization: zod
+            .string({ required_error: "need authorization header" })
+            .min(1, "invalid authorization header"),
+        }),
+        headers,
+      );
 
-  await next();
-});
+      try {
+        const token = authorization.split(" ")[1];
+        const payload = await verifyJWT(token);
+        logger.info(payload, "request payload");
+      } catch (error) {
+        throw new ValidationError({ msg: "invalid auth token" });
+      }
+    }
+
+    await next();
+  });

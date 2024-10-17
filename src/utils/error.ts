@@ -56,15 +56,7 @@ export class ServiceError extends BaseError {
   }
 }
 
-export function createErrorResponse(error: Error) {
-  if (error instanceof ValidationError) {
-    return createResponse({
-      code: error.code,
-      msg: error.name,
-      data: error.data,
-    });
-  }
-
+export function createErrorResponse(error?: Error) {
   if (error instanceof BaseError) {
     return createResponse({
       code: error.code,

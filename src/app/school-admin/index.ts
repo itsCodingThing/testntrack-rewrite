@@ -1,19 +1,35 @@
 import { Hono } from "hono";
 import { prisma } from "project/database/db.connection";
 import { encryptPassword } from "project/utils/encrypt";
-import { parseAsync, zod } from "project/utils/validation";
 import { createResponse } from "project/utils/serverResponse";
+import { parseAsync, zod } from "project/utils/validation";
 
-const admin = new Hono();
+const schoolAdmin = new Hono();
 
 /**
- *  @route  GET "/api/v1/admin"
+ *  @route  GET "/api/v1/school-admins?schoolId"
  *  @desc   Get all admins
  */
-admin.get("/admin", async (ctx) => {
+schoolAdmin.get("/school-admins", async (ctx) => {
+  const query = await parseAsync(
+    zod.object({
+      schoolId: zod.coerce.number(),
+    }),
+    ctx.req.query(),
+  );
+
+  const school = await prisma.school.findFirst({ where: { id: query.schoolId } });
+  if (!school) {
+    return ctx.json(createResponse({ msg: "Thers is no school registered with this id", code: 500 }), 500);
+  }
+
   return ctx.json(
     createResponse({
-      data: await prisma.adminUser.findMany({ select: { name: true, id: true, contact: true, email: true } }),
+      data: await prisma.schoolAdminUser.findMany({
+        where: { schoolId: school.id },
+        select: { name: true, id: true, contact: true, email: true },
+        orderBy: { name: "asc" },
+      }),
     }),
   );
 });
@@ -22,7 +38,7 @@ admin.get("/admin", async (ctx) => {
  *  @route  GET "/api/v1/admin/:adminId"
  *  @desc   Get admin details
  */
-admin.get("/admin/:adminId", async (ctx) => {
+schoolAdmin.get("/school-admin/:adminId", async (ctx) => {
   const { adminId } = await parseAsync(zod.object({ adminId: zod.coerce.number() }), ctx.req.param());
 
   return ctx.json(
@@ -39,9 +55,10 @@ admin.get("/admin/:adminId", async (ctx) => {
  *  @rotue   POST "/api/v1/admin/create"
  *  @desc    Create new user
  */
-admin.post("/admin/create", async (ctx) => {
+schoolAdmin.post("/school-admin/create", async (ctx) => {
   const body = await parseAsync(
     zod.object({
+      schoolId: zod.number().min(1, "please enter a valid school id"),
       name: zod.string().min(1, "please enter admin name"),
       email: zod.string().email("please enter a valid email"),
       password: zod.string().min(8, "password must be 8 charactor long"),
@@ -51,15 +68,15 @@ admin.post("/admin/create", async (ctx) => {
   );
 
   // check if the admin user exists with this email
-  const alreadyExistUser = await prisma.adminUser.findFirst({ where: { email: body.email } });
+  const alreadyExistUser = await prisma.schoolAdminUser.findFirst({
+    where: { email: body.email, schoolId: body.schoolId },
+  });
   if (alreadyExistUser) {
-    const code = 500;
-    ctx.status(code);
-    return ctx.json(createResponse({ code, msg: "Email already register with us" }));
+    return ctx.json(createResponse({ msg: "Email already register with us", code: 500 }), 500);
   }
 
   // create new admin user
-  const user = await prisma.adminUser.create({
+  const user = await prisma.schoolAdminUser.create({
     data: {
       ...body,
       password: encryptPassword(body.password),
@@ -79,15 +96,15 @@ admin.post("/admin/create", async (ctx) => {
 });
 
 /**
- * @route   DELETE "/api/v1/admin/user/remove/:id"
+ * @route   DELETE "/api/school-admin/:adminId/remove"
  * @desc    Remove admin
  */
-admin.delete("/admin/:adminId/remove", async (ctx) => {
+schoolAdmin.delete("/school-admin/:adminId/remove", async (ctx) => {
   const { adminId } = await parseAsync(zod.object({ adminId: zod.coerce.number() }), ctx.req.param());
   await prisma.adminUser.delete({ where: { id: adminId } });
 
   return ctx.json(createResponse({ data: "admin deleted successfully" }));
 });
 
-export type AdminApiType = typeof admin;
-export default admin;
+export type SchoolAdminApiType = typeof schoolAdmin;
+export default schoolAdmin;

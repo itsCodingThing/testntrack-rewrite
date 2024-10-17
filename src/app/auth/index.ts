@@ -97,5 +97,5 @@ auth.post("/auth/login", async (ctx) => {
   return ctx.json(createResponse({ data: { token, id: admin.id, name: admin.name, type: "admin" } }));
 });
 
-export type AuthService = typeof auth;
+export type AuthApiType = typeof auth;
 export default auth;
