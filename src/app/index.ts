@@ -1,14 +1,16 @@
 import { Hono } from "hono";
-import { logger as honoLogger } from "hono/logger";
 import { cors } from "hono/cors";
+import { logger as honoLogger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
-import auth from "./auth";
+import { authMiddleware } from "project/middleware/auth";
+import { BaseError, createErrorResponse } from "project/utils/error";
+import logger from "project/utils/logger";
 import admin from "./admin";
+import auth from "./auth";
 import school from "./school";
 import schoolAdmin from "./school-admin";
-import logger from "project/utils/logger";
-import { BaseError, createErrorResponse } from "project/utils/error";
-import { authMiddleware } from "project/middleware/auth";
+import teacher from "./teacher";
+import student from "./student";
 
 const api = new Hono().basePath("/api");
 
@@ -24,6 +26,8 @@ api.route("/", auth);
 api.route("/", admin);
 api.route("/", school);
 api.route("/", schoolAdmin);
+api.route("/", teacher);
+api.route("/", student);
 
 // common error handler
 api.onError((error, ctx) => {
