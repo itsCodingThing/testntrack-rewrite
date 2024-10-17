@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { prisma } from "project/database/db.connection";
-import { createResponse } from "project/utils/serverResponse";
+import { createResponse } from "project/utils/response";
 import { parseAsync, zod } from "project/utils/validation";
 
 const teacher = new Hono();

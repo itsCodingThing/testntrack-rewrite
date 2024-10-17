@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { parseAsync, zod } from "project/utils/validation";
 import { prisma } from "project/database/db.connection";
-import { createResponse } from "project/utils/serverResponse";
+import { createResponse } from "project/utils/response";
 
 const student = new Hono();
 

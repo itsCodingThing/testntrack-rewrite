@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import { compareHashPassword, encryptPassword } from "project/utils/encrypt";
 import { generateJWT } from "project/utils/jwt";
-import { createResponse } from "project/utils/serverResponse";
+import { createResponse } from "project/utils/response";
 import { parseAsync, zod } from "project/utils/validation";
 import { prisma } from "project/database/db.connection";
 

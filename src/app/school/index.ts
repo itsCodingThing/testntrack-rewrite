@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { prisma } from "project/database/db.connection";
 import { parseAsync, zod } from "project/utils/validation";
 import { encryptPassword } from "project/utils/encrypt";
-import { createResponse } from "project/utils/serverResponse";
+import { createResponse } from "project/utils/response";
 
 const school = new Hono();
 

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { prisma } from "project/database/db.connection";
 import { encryptPassword } from "project/utils/encrypt";
 import { parseAsync, zod } from "project/utils/validation";
-import { createResponse } from "project/utils/serverResponse";
+import { createResponse } from "project/utils/response";
 
 const admin = new Hono();
 

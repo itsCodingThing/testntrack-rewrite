@@ -1,4 +1,4 @@
-import { createResponse } from "./serverResponse.js";
+import { createResponse } from "./response.js";
 import type { ObjValueAsType } from "./types.js";
 
 const ErrorNames = {
