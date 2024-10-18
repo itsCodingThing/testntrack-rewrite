@@ -9,9 +9,9 @@ export async function parseAsync<TSchema extends z.ZodTypeAny>(schema: TSchema, 
   } catch (error) {
     if (error instanceof ZodError) {
       const errMessages = error.issues.map(({ message }) => message);
-      throw new ValidationError({ data: errMessages });
+      throw new ValidationError({ data: errMessages, msg: "failed to parse" });
     } else {
-      throw new ValidationError();
+      throw new ValidationError({ msg: "something wrong with the zod parsing" });
     }
   }
 }
