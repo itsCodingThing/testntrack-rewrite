@@ -7,19 +7,42 @@ import { createResponse } from "project/utils/response";
 const admin = new Hono();
 
 /**
- *  @route  GET "/api/v1/admin"
+ *  @route  GET "/api/admin"
  *  @desc   Get all admins
  */
 admin.get("/admin", async (ctx) => {
+  const query = await parseAsync(
+    zod.object({
+      page: zod.coerce.number().min(1, "page can not be less then 1").default(1),
+      count: zod.coerce.number().min(1, "count can not be less then 1").default(10),
+    }),
+    ctx.req.query(),
+  );
+
+  // this type of pagination is not scalable at large datasets (use cursor based pagination)
+  let skip = 0;
+  if (query.page > 1) {
+    skip = query.page * query.count;
+  }
+
+  const results = await prisma.adminUser.findMany({
+    select: { name: true, id: true, contact: true, email: true, created_at: true },
+    skip: skip,
+    take: query.count,
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
   return ctx.json(
     createResponse({
-      data: await prisma.adminUser.findMany({ select: { name: true, id: true, contact: true, email: true } }),
+      data: results,
     }),
   );
 });
 
 /**
- *  @route  GET "/api/v1/admin/:adminId"
+ *  @route  GET "/api/admin/:adminId"
  *  @desc   Get admin details
  */
 admin.get("/admin/:adminId", async (ctx) => {
@@ -36,7 +59,7 @@ admin.get("/admin/:adminId", async (ctx) => {
 });
 
 /**
- *  @rotue   POST "/api/v1/admin/create"
+ *  @rotue   POST "/api/admin/create"
  *  @desc    Create new user
  */
 admin.post("/admin/create", async (ctx) => {
@@ -79,7 +102,7 @@ admin.post("/admin/create", async (ctx) => {
 });
 
 /**
- * @route   DELETE "/api/v1/admin/user/remove/:id"
+ * @route   DELETE "/api/admin/user/remove/:id"
  * @desc    Remove admin
  */
 admin.delete("/admin/:adminId/remove", async (ctx) => {
