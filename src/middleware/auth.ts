@@ -1,7 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { ValidationError } from "project/utils/error";
 import { verifyJWT } from "project/utils/jwt";
-import logger from "project/utils/logger";
 import { parseAsync, zod } from "project/utils/validation";
 
 const NON_AUTH_URLS = ["/auth"];
@@ -22,8 +21,7 @@ export const authMiddleware = () =>
 
       try {
         const token = authorization.split(" ")[1];
-        const payload = await verifyJWT(token);
-        logger.info(payload, "request payload");
+        await verifyJWT(token);
       } catch (error) {
         throw new ValidationError({ msg: "invalid auth token" });
       }
