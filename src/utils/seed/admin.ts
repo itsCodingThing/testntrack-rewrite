@@ -10,6 +10,7 @@ const adminUsers = Array.from({ length: 1000 }, () => {
     email: faker.internet.email(),
     contact: faker.phone.number(),
     password: encryptPassword("password"),
+    created_at: faker.date.past(),
   };
 });
 console.log("fake admins created");
