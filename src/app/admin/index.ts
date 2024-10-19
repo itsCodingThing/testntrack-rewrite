@@ -26,7 +26,7 @@ admin.get("/admin", async (ctx) => {
   }
 
   const results = await prisma.adminUser.findMany({
-    select: { name: true, id: true, contact: true, email: true, created_at: true },
+    select: { name: true, id: true, contact: true, email: true, created_at: true, status: true },
     skip: skip,
     take: query.count,
     orderBy: {
@@ -52,7 +52,7 @@ admin.get("/admin/:adminId", async (ctx) => {
     createResponse({
       data: await prisma.adminUser.findFirst({
         where: { id: adminId },
-        select: { name: true, id: true, contact: true, email: true },
+        select: { name: true, id: true, contact: true, email: true, status: true },
       }),
     }),
   );
