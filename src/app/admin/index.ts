@@ -102,7 +102,53 @@ admin.post("/admin/create", async (ctx) => {
 });
 
 /**
- * @route   DELETE "/api/admin/user/remove/:id"
+ *  @rotue   PUT "/api/admin/update"
+ *  @desc    update user
+ */
+admin.put("/admin/update", async (ctx) => {
+  const { adminId, ...body } = await parseAsync(
+    zod.object({
+      adminId: zod.number({ required_error: "adminId is required" }),
+      name: zod.string().min(1, "please enter admin name").optional(),
+      email: zod.string().email("please enter a valid email").optional(),
+      password: zod.string().min(8, "password must be 8 charactor long").optional(),
+      contact: zod.string().length(10, "please enter valid contact number").optional(),
+      status: zod
+        .union([zod.literal("pending"), zod.literal("active"), zod.literal("deactive")], {
+          errorMap: () => ({ message: "status accept only [pending, active, deactive]" }),
+        })
+        .optional(),
+    }),
+    await ctx.req.json(),
+  );
+
+  // check if the user exists with this email
+  if (body.email) {
+    const alreadyExistUser = await prisma.adminUser.findFirst({ where: { email: body.email, id: { not: adminId } } });
+    if (alreadyExistUser) {
+      const code = 500;
+      ctx.status(code);
+      return ctx.json(createResponse({ code, msg: "Email already register with us" }));
+    }
+  }
+
+  // create new admin user
+  const user = await prisma.adminUser.update({
+    where: {
+      id: adminId,
+    },
+    data: body,
+  });
+
+  return ctx.json(
+    createResponse({
+      data: user,
+    }),
+  );
+});
+
+/**
+ * @route   DELETE "/api/admin/:adminId/remove"
  * @desc    Remove admin
  */
 admin.delete("/admin/:adminId/remove", async (ctx) => {
